@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BIS Food Safety Checker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f3f9f9, #e0f7fa);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 600px;
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      color: #00796B;
+      font-size: 2.5rem;
+    }
+
+    .quote {
+      font-style: italic;
+      color: #4e5d6c;
+      margin: 10px 0 30px;
+    }
+
+    input {
+      padding: 12px;
+      font-size: 16px;
+      width: 80%;
+      border: 2px solid #b2dfdb;
+      border-radius: 10px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: linear-gradient(to right, #26a69a, #00bfa5);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 191, 165, 0.4);
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .certified {
+      color: green;
+    }
+
+    .not-certified {
+      color: red;
+    }
+
+    .info-box {
+      background: linear-gradient(to top, #e0f2f1, #ffffff);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 150, 136, 0.2);
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li.good::before {
+      content: "✔ ";
+      color: green;
+    }
+
+    li.bad::before {
+      content: "✘ ";
+      color: red;
+    }
+
+    .mirror {
+      margin-top: 30px;
+      opacity: 0.15;
+      transform: scaleY(-1);
+      font-size: 100px;
+      color: #b2dfdb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BIS Food Safety Checker</h1>
+    <div class="quote">"Food safety is not a privilege, it's a right." 🍎</div>
+    <input type="text" id="barcode" placeholder="Enter barcode (e.g. 8901234567890)" />
+    <br>
+    <button onclick="checkBIS()">Check Certification</button>
+    <div id="result" class="result"></div>
+    <div id="info" class="info-box" style="display: none;"></div>
+  </div>
+
+  <div class="mirror">SAFE FOOD</div>
+
+  <script>
+    const bisDatabase = {
+      "8901234567890": {
+        name: "Maggi Noodles",
+        certified: true,
+        ingredients: { good: ["Wheat flour", "Salt"], bad: ["MSG", "Preservatives"] }
+      },
+      "8904567890123": {
+        name: "Amul Milk",
+        certified: true,
+        ingredients: { good: ["Milk", "Vitamin D"], bad: [] }
+      },
+      "8901111111111": {
+        name: "Local Chips",
+        certified: false,
+        ingredients: { good: [], bad: ["Palm oil", "Artificial colors"] }
+      }
+    };
+
+    function checkBIS() {
+      const code = document.getElementById("barcode").value.trim();
+      const resultDiv = document.getElementById("result");
+      const infoBox = document.getElementById("info");
+
+      if (bisDatabase[code]) {
+        const product = bisDatabase[code];
+        resultDiv.innerHTML = product.certified
+          ? `✅ <span class="certified">${product.name} is BIS Certified and safe.</span>`
+          : `❌ <span class="not-certified">${product.name} is NOT BIS Certified. Use caution.</span>`;
+
+        const goodList = product.ingredients.good.map(i => `<li class='good'>${i}</li>`).join('');
+        const badList = product.ingredients.bad.map(i => `<li class='bad'>${i}</li>`).join('');
+        infoBox.innerHTML = `
+          <strong>Ingredients:</strong>
+          <ul>${goodList}${badList}</ul>
+          ${!product.certified ? '<p><b>Warning:</b> Product lacks certification and may harm health.</p>' : ''}
+          <p><strong>Note:</strong> Preservatives like INS 211 or MSG, while legal, can be harmful in excess.</p>
+        `;
+        infoBox.style.display = 'block';
+      } else {
+        resultDiv.innerHTML = `⚠️ <span class="not-certified">Product not found in BIS database.</span>`;
+        infoBox.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
